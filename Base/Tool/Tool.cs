@@ -29,7 +29,7 @@ namespace GameProject
             for (int slot = 0; slot < randomList.Count; ++slot)
             {
                 int chipIdx = ((int)randomList[slot] / 10);
-                result[chipIdx] = arr[chipIdx];
+                result[slot] = arr[chipIdx];
             }
             return result;
         }

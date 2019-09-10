@@ -1,7 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-namespace GameProject
+namespace ProjectBase
 {
     public abstract class BaseSingleton<T> where T : BaseSingleton<T>, new()
     {

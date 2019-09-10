@@ -37,8 +37,6 @@ namespace GameProject.Track
                 return;
             m_Played = false;
             dir.Pause();
-
-            GameCenter.singleton.eventManager.FireEvent(NextTimeLineModuleArg.GetHashCode<NextTimeLineModuleArg>(),this,null);
         }
     }
 }
