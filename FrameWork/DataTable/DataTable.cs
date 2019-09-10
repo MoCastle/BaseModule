@@ -2,7 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-namespace GameProject
+namespace FrameWork
 {
 
     public class DataTable<T>:BaseDataTable where T:BaseData,new()
@@ -24,11 +24,19 @@ namespace GameProject
             }
         }
 
+        public IEnumerator GetEnumerator()
+        {
+            foreach (KeyValuePair<int, T> keyPair in m_DataDict)
+            {
+                yield return keyPair.Value;
+            }
+        }
+
         public override void AddData(RawData dataInfo)
         {
             T data = new T();
             data.Init(dataInfo);
-            m_DataDict.Add(data.idx, data);
+            m_DataDict.Add(data.id, data);
         }
 
         public T GetData(int idx)

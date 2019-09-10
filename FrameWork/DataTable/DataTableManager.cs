@@ -1,26 +1,15 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-namespace GameProject
+namespace FrameWork
 {
 
-    public class DataTableManager
+    public class DataTableManager:BaseManager
     {
         static DataTableManager m_single;
         Dictionary<string, BaseDataTable> m_DatatableDict;
-        public static DataTableManager single
-        {
-            get
-            {
-                if(m_single== null)
-                {
-                    m_single = new DataTableManager();
-                }
-                return m_single;
-            }
-        }
 
-        public DataTableManager()
+        public DataTableManager(FrameWorkManager frameWorkManager) : base(frameWorkManager)
         {
             m_DatatableDict = new Dictionary<string, BaseDataTable>();
         }
@@ -33,7 +22,7 @@ namespace GameProject
             {
                 
                 dataTable = new DataTable<T>();
-                TextAsset loadedTextAsset = Resources.Load<TextAsset>("Conf/" + name);
+                TextAsset loadedTextAsset = Resources.Load<TextAsset>("DataTable/" + name);
                 if(loadedTextAsset==null)
                 {
                     return null;

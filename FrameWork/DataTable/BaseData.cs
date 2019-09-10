@@ -3,13 +3,13 @@ using System.Collections.Generic;
 using UnityEngine;
 using System;
 
-namespace GameProject
+namespace FrameWork
 {
 
     public abstract class BaseData
     {
         protected static readonly string[] ColumnSplitSeparator = new string[] { "\t" };
-        public int idx
+        public int id
         {
             get;
             protected set;
@@ -23,7 +23,7 @@ namespace GameProject
         {
             AnalyzeData(dataInfo);
         }
-        public abstract void AnalyzeData(RawData dataInfo);
+        protected abstract void AnalyzeData(RawData dataInfo);
         protected string[] GetDataArr(RawData dataInfo)
         {
             return dataInfo.dataInfo.Substring(dataInfo.startPos, dataInfo.endPos - dataInfo.startPos).Split(ColumnSplitSeparator, StringSplitOptions.None);
