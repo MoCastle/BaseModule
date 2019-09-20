@@ -8,15 +8,20 @@ namespace FrameWork
     public class EventManager : BaseManager 
     {
         private Dictionary<int, LinkedList<EventHandler<FrameWorkEventArg>>> m_EventDict;
+        int firedID = -1;
+        LinkedList<EventHandler<FrameWorkEventArg>> m_TempRemovedList;
 
         public EventManager(FrameWorkManager frameWorkManager) : base(frameWorkManager)
         {
             m_EventDict = new Dictionary<int, LinkedList<EventHandler<FrameWorkEventArg>>>();
+            m_TempRemovedList = new LinkedList<EventHandler<FrameWorkEventArg>>();
+            firedID = -1;
         }
 
-        public void RegistEvent<T>(EventHandler<FrameWorkEventArg> eventHandler) where T : FrameWorkEventArg
+        public void RegistEvent<T>(EventHandler<FrameWorkEventArg> eventHandler) where T:FrameWorkEventArg
         {
-            RegistEvent(typeof(T).GetHashCode(), eventHandler as EventHandler<FrameWorkEventArg>);
+            int idx = typeof(T).GetHashCode();
+            RegistEvent(idx, eventHandler);
         }
 
         public void RegistEvent(int idx,EventHandler<FrameWorkEventArg> eventHandler)
@@ -36,13 +41,24 @@ namespace FrameWork
             }
             eventsList.AddLast(eventHandler);
         }
-
-        public void UnRegistEvent<T>(EventHandler<T> eventHandler) where T : FrameWorkEventArg
+        
+        public void UnRegistEvent<T>(EventHandler<FrameWorkEventArg> eventHandler)
         {
-            UnRegistEvent(typeof(T).GetHashCode(), eventHandler as EventHandler<FrameWorkEventArg>);
+            int idx = typeof(T).GetHashCode();
+            UnRegistEvent(idx, eventHandler);
         }
 
         public void UnRegistEvent(int idx, EventHandler<FrameWorkEventArg> eventHandler)
+        {
+            if (firedID > 0)
+            {
+                m_TempRemovedList.AddLast(eventHandler);
+                return;
+            }
+            InternalUnRegistEvent(idx, eventHandler);
+        }
+
+        void InternalUnRegistEvent(int idx, EventHandler<FrameWorkEventArg> eventHandler)
         {
             LinkedList<EventHandler<FrameWorkEventArg>> eventsList = null;
             if (!m_EventDict.TryGetValue(idx, out eventsList))
@@ -51,15 +67,15 @@ namespace FrameWork
             }
             LinkedListNode<EventHandler<FrameWorkEventArg>> eventNode = eventsList.First;
 
-            while(eventNode!=null)
+            while (eventNode != null)
             {
-                if(eventNode.Value == eventHandler)
+                if (eventNode.Value == eventHandler)
                 {
                     break;
                 }
                 eventNode = eventNode.Next;
             }
-            if(eventNode==null)
+            if (eventNode == null)
             {
                 return;
             }
@@ -74,15 +90,30 @@ namespace FrameWork
 
         public void FireEvent(int idx,object sender,FrameWorkEventArg arg)
         {
+            InternalFireEvent(idx, sender, arg);
+        }
+
+        void InternalFireEvent(int id,object sender, FrameWorkEventArg arg)
+        {
+            firedID = id;
+            m_TempRemovedList.Clear();
             LinkedList<EventHandler<FrameWorkEventArg>> eventsList = null;
-            if (!m_EventDict.TryGetValue(idx, out eventsList))
+            if (!m_EventDict.TryGetValue(id, out eventsList))
             {
                 return;
             }
-            foreach(EventHandler<FrameWorkEventArg> handler in eventsList)
+            foreach (EventHandler<FrameWorkEventArg> handler in eventsList)
             {
                 handler(sender, arg);
             }
+            if(m_TempRemovedList.Count > 0)
+            {
+                foreach (EventHandler<FrameWorkEventArg> handler in m_TempRemovedList)
+                {
+                    InternalUnRegistEvent(id, handler);
+                }
+            }
+            firedID = -1;
         }
         
     }

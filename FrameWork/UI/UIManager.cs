@@ -16,6 +16,7 @@ namespace FrameWork
         {
             m_FormDataDict = new Dictionary<string, UIFormData>();
             m_UICanavasTrans = new GameObject("UICanvas").transform;
+            GameObject.DontDestroyOnLoad(m_UICanavasTrans);
             m_GroupDict = new Dictionary<string, UIGroup>();
         }
 
@@ -28,12 +29,12 @@ namespace FrameWork
             }
         }
 
-        public void Open<T>(FormArg formArg = null) where T:Form
+        public void Open<T>(object formArg = null) where T:Form
         {
             Open(typeof(T).Name, formArg);
         }
 
-        public void Open(string formName, FormArg formArg = null)
+        public void Open(string formName, object formArg = null)
         {
             UIFormData data = null;
             m_FormDataDict.TryGetValue(formName, out data);
@@ -43,7 +44,7 @@ namespace FrameWork
             }
         }
 
-        public void Open(int formID, FormArg formArg = null)
+        public void Open(int formID, object formArg = null)
         {
             UIFormData data = null;
             data = m_UIDatatable.GetData(formID);
@@ -53,7 +54,7 @@ namespace FrameWork
             }
         }
 
-        void InternalOpenUI(UIFormData formData, FormArg formArg = null)
+        void InternalOpenUI(UIFormData formData, object formArg = null)
         {
             UIGroup group = GetGroup(formData.groupName);
             Form form = group.GetForm(formData.uiName);
@@ -67,16 +68,17 @@ namespace FrameWork
             if (form == null)
                 return;
             form.Init(formData,formArg);
-            form.OnOpen();
+            group.Refresh();
+            form.Open();
         }
 
         public void CloseForm(Form form)
         {
-            form.OnClose();
-
+            form.OnClosed();
             UIFormData data = form.formData;
             UIGroup group = GetGroup(data.groupName);
             group.RemoveForm(form);
+            group.Refresh();
             GameObject.Destroy(form.gameObject);
         }
 

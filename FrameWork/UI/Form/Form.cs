@@ -6,37 +6,56 @@ namespace FrameWork.UI
 {
     public class Form : MonoBehaviour
     {
-        public bool hided { get { return gameObject.active; } }
+        bool m_BeHided;
+        public bool hided { get { return m_BeHided; } }
         public bool cover { get; private set; }
         public UIFormData formData { get; private set; }
-        public virtual void Init(UIFormData data, FormArg arg = null)
+        BaseFormEffect m_FormEffect;
+        protected UIManager m_UIManager;
+
+        public virtual void Init(UIFormData data, object arg = null)
         {
             formData = data;
+            GenFormEffect();
+            m_UIManager = FrameWorkManager.singleton.GetManager<UIManager>();
         }
 
         public void Close()
         {
-            FrameWorkManager.singleton.GetManager<UIManager>().CloseForm(this);
+            if (m_BeHided)
+                InternalClose();
+            else if(m_FormEffect!=null)
+                m_FormEffect.OnFormHide(InternalClose);
         }
 
-        public virtual void OnOpen()
+        protected virtual void InternalClose()
         {
-
+            UIManager uiManager = m_UIManager;
+            uiManager.CloseForm(this);
         }
 
-        public virtual void OnClose()
+        public virtual void Open()
+        {
+            OnShow();
+        }
+
+        public virtual void OnClosed()
         {
 
         }
 
         public virtual void OnHide()
         {
-
+            m_BeHided = true;
+            if (m_FormEffect != null)
+                m_FormEffect.OnFormHide(null);
         }
 
         public virtual void OnShow()
         {
-
+            m_BeHided = false;
+            if (m_FormEffect != null)
+                m_FormEffect.OnFormShow(null);
         }
 
         public virtual void OnCover()
@@ -47,6 +66,13 @@ namespace FrameWork.UI
         public virtual void OnResume()
         {
             cover = false;
+        }
+
+        public virtual void GenFormEffect()
+        {
+            m_FormEffect = GetComponent<BaseFormEffect>();
+            if (m_FormEffect == null)
+                m_FormEffect = gameObject.AddComponent<DefaultFormEffect>();
         }
     }
 
